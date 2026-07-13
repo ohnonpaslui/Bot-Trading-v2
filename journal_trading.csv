@@ -1,0 +1,2 @@
+date,prix_btc,macd,signal,rsi,sentiment_marche,decision,taille_position_appliquee,mode_prudent,pertes_consecutives,position,capital,btc_detenu,prix_entree,pnl_pct,valeur_totale
+2026-07-13 16:58 UTC,62206.7,,,,Fear,"EN ATTENTE (historique insuffisant, ~35 jours nécessaires pour le MACD)",1.0,False,0,0.0,1000.0,0.0,,,1000.0
