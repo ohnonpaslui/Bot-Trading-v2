@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A.R.I.A — Console</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --bg:#020407;
+    --cyan:#4ff0ff;
+    --cyan-dim:#1a5a66;
+    --gain:#4bffb0;
+    --loss:#ff5566;
+    --amber:#ffcc66;
+    --text:#cfe9ee;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);
+    font-family:'IBM Plex Mono',monospace; overflow-x:hidden;}
+  .display{font-family:'Orbitron',sans-serif;}
+
+  body{
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(79,240,255,0.07), transparent 60%),
+      radial-gradient(ellipse at 50% 100%, rgba(79,240,255,0.05), transparent 60%),
+      var(--bg);
+    min-height:100vh; display:flex; flex-direction:column;
+  }
+
+  /* Scanline / grid overlay */
+  .grid-overlay{
+    position:fixed; inset:0; pointer-events:none; z-index:1; opacity:.35;
+    background-image:
+      linear-gradient(rgba(79,240,255,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(79,240,255,.04) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+
+  header{padding:16px 18px 4px; text-align:center; position:relative; z-index:2;}
+  header .display{font-size:15px; letter-spacing:.35em; color:var(--cyan); margin:0;
+    text-shadow:0 0 12px rgba(79,240,255,.6);}
+  header small{display:block; margin-top:4px; font-size:10px; letter-spacing:.2em; color:var(--cyan-dim);}
+
+  /* CORE */
+  .core-wrap{position:relative; width:min(72vw,300px); height:min(72vw,300px); margin:14px auto; z-index:2;}
+  .ring{position:absolute; inset:0; border-radius:50%; border:1px solid rgba(79,240,255,.25);}
+  .ring.r1{animation:spin 18s linear infinite;}
+  .ring.r2{inset:14px; border-style:dashed; animation:spin 26s linear infinite reverse;}
+  .ring.r3{inset:30px; border-color:rgba(79,240,255,.4); animation:spin 12s linear infinite;}
+  @keyframes spin{from{transform:rotate(0)} to{transform:rotate(360deg)}}
+  .ring.r1::before, .ring.r3::before{
+    content:''; position:absolute; width:6px; height:6px; border-radius:50%; background:var(--cyan);
+    top:-3px; left:50%; box-shadow:0 0 8px var(--cyan);
+  }
+  .core{
+    position:absolute; inset:56px; border-radius:50%;
+    background:radial-gradient(circle at 40% 35%, rgba(79,240,255,.25), rgba(79,240,255,.02) 70%);
+    border:1px solid rgba(79,240,255,.5);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    box-shadow:0 0 40px rgba(79,240,255,.25), inset 0 0 30px rgba(79,240,255,.15);
+    animation:pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{box-shadow:0 0 40px rgba(79,240,255,.2), inset 0 0 30px rgba(79,240,255,.12);}
+    50%{box-shadow:0 0 60px rgba(79,240,255,.4), inset 0 0 40px rgba(79,240,255,.22);}}
+  .core .val{font-family:'Orbitron',sans-serif; font-size:26px; font-weight:700; color:var(--cyan);
+    text-shadow:0 0 14px rgba(79,240,255,.7);}
+  .core .lbl{font-size:9px; letter-spacing:.15em; color:var(--cyan-dim); margin-top:4px;}
+  .core .perf{font-size:12px; margin-top:6px; letter-spacing:.05em;}
+
+  /* Status readouts */
+  .readouts{display:flex; justify-content:center; gap:10px; flex-wrap:wrap; padding:6px 16px 10px; z-index:2; position:relative;}
+  .ro{border:1px solid rgba(79,240,255,.2); background:rgba(79,240,255,.03); padding:8px 12px; border-radius:4px; min-width:92px; text-align:center;}
+  .ro .l{font-size:8px; letter-spacing:.12em; color:var(--cyan-dim); text-transform:uppercase;}
+  .ro .v{font-size:12px; margin-top:4px; color:var(--text); font-weight:600;}
+
+  /* Console log */
+  main{flex:1; max-width:640px; width:100%; margin:0 auto; padding:0 16px 12px; z-index:2; position:relative; display:flex; flex-direction:column;}
+  #log{
+    flex:1; min-height:180px; max-height:38vh; overflow-y:auto;
+    border:1px solid rgba(79,240,255,.2); border-radius:6px; padding:12px;
+    background:rgba(79,240,255,.02); font-size:12.5px; line-height:1.6;
+  }
+  #log .u{color:var(--amber);} #log .u::before{content:'▸ VOUS   '; color:var(--cyan-dim); font-size:10px;}
+  #log .a{color:var(--cyan); margin-bottom:10px; display:block;} #log .a::before{content:'▸ A.R.I.A '; color:var(--cyan-dim); font-size:10px;}
+  #log .sys{color:var(--cyan-dim); font-size:11px; font-style:italic;}
+
+  .input-row{display:flex; gap:8px; margin-top:10px;}
+  #textInput{
+    flex:1; background:rgba(79,240,255,.04); border:1px solid rgba(79,240,255,.3); color:var(--text);
+    font-family:'IBM Plex Mono',monospace; font-size:13px; padding:11px 12px; border-radius:5px; outline:none;
+  }
+  #textInput:focus{border-color:var(--cyan);}
+  .icon-btn{
+    background:rgba(79,240,255,.08); border:1px solid rgba(79,240,255,.35); color:var(--cyan);
+    width:44px; border-radius:5px; cursor:pointer; font-size:16px;
+  }
+  .icon-btn.listening{background:var(--loss); border-color:var(--loss); color:#fff; animation:pulse 1s infinite;}
+  .icon-btn:active{transform:translateY(1px);}
+
+  .repo-row{display:flex; gap:8px; justify-content:center; padding:6px 16px 2px; font-size:10px; color:var(--cyan-dim); align-items:center;}
+  .repo-row input{background:transparent; border:none; border-bottom:1px dashed rgba(79,240,255,.3); color:var(--cyan-dim);
+    font-family:'IBM Plex Mono',monospace; font-size:10px; text-align:center; width:220px;}
+
+  footer{text-align:center; padding:10px; font-size:9px; letter-spacing:.1em; color:rgba(79,240,255,.25); z-index:2; position:relative;}
+</style>
+</head>
+<body>
+<div class="grid-overlay"></div>
+
+<header>
+  <h1 class="display">A . R . I . A</h1>
+  <small>ASSISTANT DE SURVEILLANCE — BOT BTC</small>
+</header>
+
+<div class="repo-row">
+  DÉPÔT&nbsp;: <input id="repoInput" value="ohnonpaslui/Bot-Trading-v2" spellcheck="false">
+</div>
+
+<div class="core-wrap">
+  <div class="ring r1"></div>
+  <div class="ring r2"></div>
+  <div class="ring r3"></div>
+  <div class="core">
+    <div class="val" id="coreVal">—</div>
+    <div class="lbl">VALEUR PORTEFEUILLE</div>
+    <div class="perf" id="corePerf">—</div>
+  </div>
+</div>
+
+<div class="readouts" id="readouts">
+  <div class="ro"><div class="l">Prix BTC</div><div class="v" id="roPrice">—</div></div>
+  <div class="ro"><div class="l">Position</div><div class="v" id="roPos">—</div></div>
+  <div class="ro"><div class="l">Sentiment</div><div class="v" id="roSent">—</div></div>
+  <div class="ro"><div class="l">Dernière décision</div><div class="v" id="roDec">—</div></div>
+</div>
+
+<main>
+  <div id="log"><span class="sys">Initialisation… connexion au dépôt en cours.</span></div>
+  <div class="input-row">
+    <input id="textInput" placeholder="Pose une question à A.R.I.A…" />
+    <button class="icon-btn" id="micBtn" title="Parler">🎙</button>
+    <button class="icon-btn" id="sendBtn" title="Envoyer">➤</button>
+  </div>
+</main>
+
+<footer>DONNÉES EN LECTURE SEULE · AUCUN ORDRE RÉEL N'EST PASSÉ</footer>
+
+<script>
+let botData = null;
+
+function parseCSV(text){
+  const lines = text.trim().split('\n');
+  function parseLine(line){
+    const result = [];
+    let cur = '';
+    let inQuotes = false;
+    for(let i=0;i<line.length;i++){
+      const c = line[i];
+      if(inQuotes){
+        if(c === '"'){
+          if(line[i+1] === '"'){ cur += '"'; i++; }
+          else inQuotes = false;
+        } else cur += c;
+      } else {
+        if(c === '"') inQuotes = true;
+        else if(c === ','){ result.push(cur); cur=''; }
+        else cur += c;
+      }
+    }
+    result.push(cur);
+    return result;
+  }
+  const headers = parseLine(lines[0]);
+  return lines.slice(1).filter(l=>l.trim().length>0).map(line=>{
+    const vals = parseLine(line);
+    const row = {};
+    headers.forEach((h,i)=> row[h.trim()] = (vals[i]||'').trim());
+    return row;
+  });
+}
+
+function log(role, text){
+  const el = document.getElementById('log');
+  const span = document.createElement('span');
+  span.className = role;
+  span.textContent = text;
+  el.appendChild(span);
+  el.appendChild(document.createElement('br'));
+  el.scrollTop = el.scrollHeight;
+}
+
+async function loadData(){
+  const repo = document.getElementById('repoInput').value.trim();
+  const url = `https://raw.githubusercontent.com/${repo}/main/journal_trading.csv?t=${Date.now()}`;
+  try{
+    const res = await fetch(url);
+    if(!res.ok) throw new Error('introuvable');
+    const rows = parseCSV(await res.text());
+    botData = rows;
+    updateHUD(rows[rows.length-1]);
+    log('sys', `Connexion établie. ${rows.length} entrées chargées depuis ${repo}.`);
+    speak("Connexion établie. Je surveille le bot.");
+  }catch(e){
+    log('sys', "⚠ Impossible de lire le journal. Vérifie que le bot a déjà tourné au moins une fois, et que le nom du dépôt est correct.");
+  }
+}
+
+function updateHUD(last){
+  if(!last) return;
+  const perf = (parseFloat(last.valeur_totale)/1000 - 1) * 100;
+  document.getElementById('coreVal').textContent = parseFloat(last.valeur_totale).toFixed(0) + '€';
+  const perfEl = document.getElementById('corePerf');
+  perfEl.textContent = (perf>=0?'▲ +':'▼ ') + perf.toFixed(2) + '%';
+  perfEl.style.color = perf>=0 ? 'var(--gain)' : 'var(--loss)';
+  document.getElementById('roPrice').textContent = '$' + parseFloat(last.prix_btc).toLocaleString();
+  document.getElementById('roPos').textContent = last.position === '1' ? 'BTC' : 'CASH';
+  document.getElementById('roSent').textContent = last.sentiment_marche || '—';
+  document.getElementById('roDec').textContent = (last.decision||'—').split(' ')[0];
+}
+
+function speak(text){
+  if(!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'fr-FR'; u.rate = 1.02; u.pitch = 0.85;
+  window.speechSynthesis.speak(u);
+}
+
+async function askARIA(question){
+  log('u', question);
+  if(!botData || botData.length === 0){
+    log('a', "Je n'ai pas encore de données du bot chargées.");
+    return;
+  }
+  const answer = generateAnswer(question, botData);
+  log('a', answer);
+  speak(answer);
+}
+
+function generateAnswer(question, rows){
+  const q = question.toLowerCase();
+  const last = rows[rows.length-1];
+  const perf = (parseFloat(last.valeur_totale)/1000 - 1) * 100;
+  const trades = rows.filter(r=> r.decision==='VENTE' && r.pnl_pct !== '');
+  const gains = trades.filter(t=> parseFloat(t.pnl_pct) > 0);
+
+  if(q.includes('perform') || q.includes('gagn') || q.includes('résultat') || q.includes('resultat')){
+    return `Le portefeuille est actuellement à ${parseFloat(last.valeur_totale).toFixed(2)} euros, soit ${perf>=0?'un gain':'une perte'} de ${Math.abs(perf).toFixed(2)} pourcent depuis le début. ${trades.length} trade${trades.length>1?'s':''} clôturé${trades.length>1?'s':''} jusqu'à présent.`;
+  }
+  if(q.includes('position') || q.includes('investi') || q.includes('lancé') || q.includes('lance') || q.includes('marche') && q.includes('bien')){
+    return last.position === '1'
+      ? `Le bot est actuellement investi en BTC, entré à ${last.prix_entree || 'un prix non précisé'} dollars.`
+      : `Le bot est actuellement en cash, il attend un signal d'achat.`;
+  }
+  if(q.includes('sentiment') || q.includes('marché') || q.includes('marche')){
+    return `Le sentiment de marché actuel est "${last.sentiment_marche}". ${last.mode_prudent==='True' ? "Le mode prudent est activé, l'exposition est réduite." : "Fonctionnement normal."}`;
+  }
+  if(q.includes('décision') || q.includes('decision') || q.includes('dernier') || q.includes('derniere') || q.includes('dernière')){
+    return `La dernière décision enregistrée est : ${last.decision}, à un prix BTC de ${parseFloat(last.prix_btc).toLocaleString()} dollars, le ${last.date}.`;
+  }
+  if(q.includes('perte') || q.includes('rate') || q.includes('erreur')){
+    return `${last.pertes_consecutives || 0} perte${(last.pertes_consecutives||0)>1?'s':''} consécutive${(last.pertes_consecutives||0)>1?'s':''} enregistrée${(last.pertes_consecutives||0)>1?'s':''} pour l'instant.`;
+  }
+  if(q.includes('amélior') || q.includes('amelior') || q.includes('conseil')){
+    return `Je ne fais que rapporter les données, je ne peux pas encore proposer d'améliorations moi-même. Pose la question à Claude directement dans ta conversation pour ça.`;
+  }
+  if(q.includes('prix')){
+    return `Le prix BTC actuel enregistré est de ${parseFloat(last.prix_btc).toLocaleString()} dollars, relevé le ${last.date}.`;
+  }
+  return `Voici l'état actuel : ${parseFloat(last.valeur_totale).toFixed(2)} euros dans le portefeuille, position ${last.position==='1'?'BTC':'cash'}, sentiment de marché "${last.sentiment_marche}".`;
+}
+
+document.getElementById('sendBtn').onclick = ()=>{
+  const input = document.getElementById('textInput');
+  const q = input.value.trim();
+  if(q){ askARIA(q); input.value=''; }
+};
+document.getElementById('textInput').addEventListener('keydown', e=>{
+  if(e.key==='Enter') document.getElementById('sendBtn').click();
+});
+document.getElementById('repoInput').addEventListener('change', loadData);
+
+// --- Reconnaissance vocale (si disponible) ---
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const micBtn = document.getElementById('micBtn');
+if(SR){
+  const recognition = new SR();
+  recognition.lang = 'fr-FR';
+  recognition.interimResults = false;
+  let listening = false;
+  micBtn.onclick = ()=>{
+    if(listening) return;
+    listening = true;
+    micBtn.classList.add('listening');
+    recognition.start();
+  };
+  recognition.onresult = (e)=>{
+    const said = e.results[0][0].transcript;
+    askARIA(said);
+  };
+  recognition.onend = ()=>{ listening=false; micBtn.classList.remove('listening'); };
+  recognition.onerror = ()=>{ listening=false; micBtn.classList.remove('listening'); log('sys','Micro indisponible sur ce navigateur — utilise le champ texte.'); };
+}else{
+  micBtn.onclick = ()=> log('sys','Reconnaissance vocale non supportée ici — utilise le champ texte.');
+}
+
+loadData();
+setInterval(loadData, 60000); // rafraîchit les données toutes les minutes
+</script>
+</body>
+</html>
