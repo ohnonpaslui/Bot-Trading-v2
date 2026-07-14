@@ -25,7 +25,7 @@ jobs:
           python-version: "3.11"
 
       - name: Lancer le bot (decision du moment)
-        run: python bot_trading_quotidien_v6.py
+        run: python bot_trading_quotidien_v7.py
 
       - name: Sauvegarder le journal dans le depot
         run: |
