@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BOT·BTC // Terminal</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap');
+
+  :root{
+    --bg:#07060a;
+    --panel:#0d0b12;
+    --line: rgba(255,45,180,0.35);
+    --line-dim: rgba(255,45,180,0.15);
+    --magenta:#ff2db4;
+    --magenta-dim:#8a1a63;
+    --text:#eae6f0;
+    --dim:#7a7285;
+    --gain:#2de6a0;
+    --loss:#ff4d6d;
+    --amber:#ffc94d;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;background:var(--bg);color:var(--text);font-family:'IBM Plex Mono',monospace;}
+  .display{font-family:'Space Grotesk',sans-serif;}
+
+  /* écran de verrouillage */
+  .lock-screen{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:16px;text-align:center;padding:20px;}
+  .lock-screen.hidden{display:none;}
+  .lock-icon{width:50px;height:50px;border:2px solid var(--magenta);border-radius:50%;display:flex;
+    align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 18px rgba(255,45,180,.4);}
+  .lock-title{font-size:13px;letter-spacing:.25em;color:var(--magenta);}
+  #lockInput{background:rgba(255,45,180,.06);border:1px solid var(--line);color:var(--text);
+    font-family:'IBM Plex Mono',monospace;font-size:14px;padding:11px 14px;border-radius:5px;text-align:center;
+    width:min(70vw,220px);letter-spacing:.1em;}
+  #lockBtn{background:rgba(255,45,180,.12);border:1px solid var(--magenta);color:var(--magenta);
+    font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:9px 20px;border-radius:5px;}
+  #lockError{color:var(--loss);font-size:11px;height:14px;}
+
+  header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;
+    border-bottom:1px solid var(--line-dim);position:sticky;top:0;background:rgba(7,6,10,.95);z-index:20;}
+  .brand{display:flex;align-items:center;gap:8px;}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--magenta);box-shadow:0 0 8px var(--magenta);animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .brand b{font-size:12px;letter-spacing:.12em;}
+  #clock{font-size:10px;color:var(--dim);}
+  .repo-input{background:transparent;border:none;border-bottom:1px dashed var(--line-dim);color:var(--dim);
+    font-family:'IBM Plex Mono',monospace;font-size:9px;width:170px;text-align:right;}
+
+  main{max-width:1000px;margin:0 auto;padding:10px;}
+
+  .grid3{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:8px;}
+  @media(min-width:720px){.grid3{grid-template-columns:1fr 1.4fr 1fr;}}
+
+  .panel{background:var(--panel);border:1px solid var(--line-dim);border-radius:6px;padding:12px;position:relative;overflow:hidden;}
+  .panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+    background:linear-gradient(90deg,var(--magenta),transparent);}
+  .panel h3{font-size:9px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;margin:0 0 8px;font-weight:500;}
+
+  .wallet-val{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;}
+  .wallet-perf{font-size:12px;margin-top:2px;}
+  .wallet-row{display:flex;justify-content:space-between;font-size:10px;color:var(--dim);margin-top:10px;
+    padding-top:8px;border-top:1px solid var(--line-dim);}
+  .wallet-row b{color:var(--text);}
+
+  .chart-box{height:150px;position:relative;}
+
+  .signal-row{display:flex;justify-content:space-between;font-size:11px;padding:5px 0;
+    border-bottom:1px dashed var(--line-dim);}
+  .signal-row:last-child{border-bottom:none;}
+  .signal-row span:last-child{font-weight:600;}
+
+  .field-panel{margin-bottom:8px;}
+  .field-wrap{display:flex;flex-wrap:wrap;gap:5px;align-items:center;min-height:70px;padding:4px;}
+  .bubble{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
+  .bubble.achat{background:var(--gain);box-shadow:0 0 6px var(--gain);}
+  .bubble.vente-gain{background:var(--gain);opacity:.55;}
+  .bubble.vente-perte{background:var(--loss);box-shadow:0 0 6px var(--loss);}
+  .bubble.hold{background:var(--dim);opacity:.35;width:6px;height:6px;}
+  .bubble.attente{background:var(--amber);opacity:.4;width:6px;height:6px;}
+  .field-legend{display:flex;gap:14px;font-size:9px;color:var(--dim);margin-top:6px;flex-wrap:wrap;}
+  .field-legend span{display:flex;align-items:center;gap:4px;}
+  .legend-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+
+  .bottom-grid{display:grid;grid-template-columns:1fr;gap:8px;}
+  @media(min-width:720px){.bottom-grid{grid-template-columns:1.3fr 1fr;}}
+
+  table{width:100%;border-collapse:collapse;font-size:10px;}
+  thead th{text-align:left;color:var(--dim);font-weight:500;text-transform:uppercase;letter-spacing:.05em;
+    padding:5px 4px;border-bottom:1px solid var(--line-dim);position:sticky;top:0;background:var(--panel);}
+  tbody td{padding:5px 4px;border-bottom:1px solid var(--line-dim);white-space:nowrap;}
+  .log-scroll{max-height:260px;overflow-y:auto;}
+  .badge{padding:1px 6px;border-radius:3px;font-size:9px;font-weight:600;}
+  .b-achat{background:rgba(45,230,160,.12);color:var(--gain);}
+  .b-vente{background:rgba(255,77,109,.12);color:var(--loss);}
+  .b-hold{background:rgba(122,114,133,.15);color:var(--dim);}
+  .b-attente{background:rgba(255,201,77,.12);color:var(--amber);}
+
+  #status{font-size:11px;color:var(--dim);text-align:center;padding:40px 20px;}
+  #status.error{color:var(--loss);}
+  footer{text-align:center;padding:16px;color:var(--dim);font-size:9px;letter-spacing:.06em;}
+</style>
+</head>
+<body>
+
+<div id="mainApp" style="display:block;">
+
+<header>
+  <div class="brand"><span class="dot"></span><b>BOT·BTC TERMINAL</b></div>
+  <div style="text-align:right;">
+    <div id="clock">--</div>
+    <input id="repoInput" class="repo-input" value="ohnonpaslui/Bot-Trading-v2" spellcheck="false">
+  </div>
+</header>
+
+<main>
+  <div id="status">Connexion au dépôt en cours…</div>
+  <div id="content" style="display:none;">
+
+    <div class="grid3">
+      <div class="panel">
+        <h3>Portefeuille</h3>
+        <div class="wallet-val" id="wVal">—</div>
+        <div class="wallet-perf" id="wPerf">—</div>
+        <div class="wallet-row"><span>Position</span><b id="wPos">—</b></div>
+        <div class="wallet-row"><span>Trades clôturés</span><b id="wTrades">—</b></div>
+        <div class="wallet-row"><span>Taux de réussite</span><b id="wWinrate">—</b></div>
+      </div>
+
+      <div class="panel">
+        <h3>Prix BTC (relevés du bot)</h3>
+        <div class="chart-box"><canvas id="priceChart"></canvas></div>
+      </div>
+
+      <div class="panel">
+        <h3>Dernier signal</h3>
+        <div class="signal-row"><span>Prix</span><span id="sPrice">—</span></div>
+        <div class="signal-row"><span>RSI actuel</span><span id="sRsi">—</span></div>
+        <div class="signal-row"><span>RSI précédent</span><span id="sRsiPrec">—</span></div>
+        <div class="signal-row"><span>Bougie détectée</span><span id="sMotif">—</span></div>
+        <div class="signal-row"><span>Sentiment marché</span><span id="sSent">—</span></div>
+        <div class="signal-row"><span>Décision</span><span id="sDec">—</span></div>
+      </div>
+    </div>
+
+    <div class="panel field-panel">
+      <h3>Historique des décisions (dernières exécutions)</h3>
+      <div class="field-wrap" id="fieldWrap"></div>
+      <div class="field-legend">
+        <span><i class="legend-dot" style="background:var(--gain)"></i>Achat / Vente gagnante</span>
+        <span><i class="legend-dot" style="background:var(--loss)"></i>Vente perdante</span>
+        <span><i class="legend-dot" style="background:var(--dim)"></i>Hold</span>
+        <span><i class="legend-dot" style="background:var(--amber)"></i>En attente</span>
+      </div>
+    </div>
+
+    <div class="bottom-grid">
+      <div class="panel">
+        <h3>Évolution du portefeuille</h3>
+        <div class="chart-box"><canvas id="equityChart"></canvas></div>
+      </div>
+      <div class="panel">
+        <h3>RSI (dernières exécutions)</h3>
+        <div class="chart-box"><canvas id="rsiChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:8px;">
+      <h3>Execution log</h3>
+      <div class="log-scroll">
+        <table>
+          <thead><tr><th>Heure</th><th>Prix</th><th>RSI</th><th>Bougie</th><th>Décision</th></tr></thead>
+          <tbody id="logBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:8px;">
+      <h3>Parler au bot</h3>
+      <div class="log-scroll" id="chatLog" style="max-height:200px; font-size:11px; line-height:1.6; margin-bottom:10px;">
+        <span style="color:var(--dim); font-style:italic;">Pose une question sur l'état du bot.</span>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <input id="chatInput" placeholder="Ex: quelle est ma performance ?"
+          style="flex:1; background:rgba(255,45,180,.05); border:1px solid var(--line); color:var(--text);
+          font-family:'IBM Plex Mono',monospace; font-size:13px; padding:10px 12px; border-radius:5px; outline:none;">
+        <button id="micBtn" title="Parler" style="width:42px; background:rgba(255,45,180,.1); border:1px solid var(--magenta);
+          color:var(--magenta); border-radius:5px; font-size:15px;">🎙</button>
+        <button id="sendBtn" title="Envoyer" style="width:42px; background:rgba(255,45,180,.1); border:1px solid var(--magenta);
+          color:var(--magenta); border-radius:5px; font-size:15px;">➤</button>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer>DONNÉES RÉELLES LUES DEPUIS GITHUB · PAPER TRADING · AUCUN ORDRE RÉEL</footer>
+</div>
+
+<script>
+  function parseCSV(text){
+    const lines = text.trim().split('\n');
+    function parseLine(line){
+      const result=[]; let cur=''; let inQ=false;
+      for(let i=0;i<line.length;i++){
+        const c=line[i];
+        if(inQ){
+          if(c==='"'){ if(line[i+1]==='"'){cur+='"';i++;} else inQ=false; }
+          else cur+=c;
+        } else {
+          if(c==='"') inQ=true;
+          else if(c===','){ result.push(cur); cur=''; }
+          else cur+=c;
+        }
+      }
+      result.push(cur);
+      return result;
+    }
+    const headers = parseLine(lines[0]);
+    return lines.slice(1).filter(l=>l.trim().length>0).map(line=>{
+      const vals = parseLine(line);
+      const row = {};
+      headers.forEach((h,i)=> row[h.trim()] = (vals[i]||'').trim());
+      return row;
+    });
+  }
+
+  function fmtTime(d){ return (d||'').replace(' UTC','').slice(5,16); }
+  function decisionKind(dec){
+    if(!dec) return 'hold';
+    if(dec.startsWith('ACHAT')) return 'achat';
+    if(dec.startsWith('VENTE')) return 'vente';
+    if(dec.startsWith('EN ATTENTE')) return 'attente';
+    return 'hold';
+  }
+
+  let priceChart, equityChart, rsiChart;
+  let rows = [];
+
+  async function load(){
+    const repo = document.getElementById('repoInput').value.trim();
+    const status = document.getElementById('status');
+    const content = document.getElementById('content');
+    status.style.display='block'; status.className=''; content.style.display='none';
+    status.textContent = 'Chargement de journal_trading.csv…';
+    const url = `https://raw.githubusercontent.com/${repo}/main/journal_trading.csv?t=${Date.now()}`;
+    try{
+      const res = await fetch(url);
+      if(!res.ok) throw new Error("Fichier introuvable (le bot a-t-il déjà tourné ?)");
+      const text = await res.text();
+      rows = parseCSV(text);
+      if(rows.length===0) throw new Error("Journal vide.");
+      render(rows);
+      status.style.display='none';
+      content.style.display='block';
+    }catch(e){
+      status.className='error';
+      status.textContent = '⚠ ' + e.message;
+    }
+  }
+
+  function render(rows){
+    const last = rows[rows.length-1];
+    const perf = (parseFloat(last.valeur_totale)/1000 - 1) * 100;
+    const trades = rows.filter(r=>r.decision && r.decision.startsWith('VENTE') && r.pnl_pct!=='');
+    const gains = trades.filter(t=>parseFloat(t.pnl_pct)>0);
+
+    document.getElementById('wVal').textContent = parseFloat(last.valeur_totale).toFixed(2)+'€';
+    const wPerf = document.getElementById('wPerf');
+    wPerf.textContent = (perf>=0?'▲ +':'▼ ')+perf.toFixed(2)+'%';
+    wPerf.style.color = perf>=0 ? 'var(--gain)' : 'var(--loss)';
+    document.getElementById('wPos').textContent = last.position==='1' ? 'BTC' : 'CASH';
+    document.getElementById('wTrades').textContent = trades.length;
+    document.getElementById('wWinrate').textContent = trades.length ? (gains.length/trades.length*100).toFixed(0)+'%' : '—';
+
+    document.getElementById('sPrice').textContent = '$'+parseFloat(last.prix_btc).toLocaleString();
+    document.getElementById('sRsi').textContent = last.rsi || '—';
+    document.getElementById('sRsiPrec').textContent = last.rsi_precedent || '—';
+    document.getElementById('sMotif').textContent = last.motif_chandelier || 'Aucune';
+    document.getElementById('sSent').textContent = last.sentiment_marche || '—';
+    document.getElementById('sDec').textContent = (last.decision||'—').split(' (')[0];
+
+    // Champ de bulles = vraies décisions, pas du bruit aléatoire
+    const fieldWrap = document.getElementById('fieldWrap');
+    const recent = rows.slice(-60);
+    fieldWrap.innerHTML = recent.map(r=>{
+      let cls = 'hold';
+      const kind = decisionKind(r.decision);
+      if(kind==='achat') cls='achat';
+      else if(kind==='vente') cls = (parseFloat(r.pnl_pct)>0) ? 'vente-gain' : 'vente-perte';
+      else if(kind==='attente') cls='attente';
+      const title = `${fmtTime(r.date)} | ${r.decision}`;
+      return `<div class="bubble ${cls}" title="${title}"></div>`;
+    }).join('');
+
+    // Graphique de prix avec marqueurs achat/vente
+    const labels = rows.map(r=>fmtTime(r.date));
+    const prices = rows.map(r=>parseFloat(r.prix_btc));
+    const buys = rows.map(r=> decisionKind(r.decision)==='achat' ? parseFloat(r.prix_btc) : null);
+    const sells = rows.map(r=> decisionKind(r.decision)==='vente' ? parseFloat(r.prix_btc) : null);
+    if(priceChart) priceChart.destroy();
+    priceChart = new Chart(document.getElementById('priceChart'), {
+      type:'line',
+      data:{labels, datasets:[
+        {data:prices, borderColor:'#ff2db4', borderWidth:1.3, pointRadius:0, tension:.15},
+        {data:buys, borderColor:'transparent', backgroundColor:'#2de6a0', pointRadius:5, pointStyle:'triangle', showLine:false},
+        {data:sells, borderColor:'transparent', backgroundColor:'#ff4d6d', pointRadius:5, pointStyle:'rectRot', showLine:false},
+      ]},
+      options: baseOpts('$')
+    });
+
+    // Courbe d'équité
+    const equity = rows.map(r=>parseFloat(r.valeur_totale));
+    if(equityChart) equityChart.destroy();
+    equityChart = new Chart(document.getElementById('equityChart'), {
+      type:'line',
+      data:{labels, datasets:[{data:equity, borderColor:'#2de6a0', backgroundColor:'rgba(45,230,160,.08)',
+        fill:true, borderWidth:1.5, pointRadius:0, tension:.2}]},
+      options: baseOpts('€')
+    });
+
+    // RSI
+    const rsiVals = rows.map(r=> r.rsi!=='' ? parseFloat(r.rsi) : null);
+    if(rsiChart) rsiChart.destroy();
+    rsiChart = new Chart(document.getElementById('rsiChart'), {
+      type:'line',
+      data:{labels, datasets:[{data:rsiVals, borderColor:'#ffc94d', borderWidth:1.5, pointRadius:0, tension:.2}]},
+      options: {...baseOpts(''), scales:{...baseOpts('').scales, y:{...baseOpts('').scales.y, min:0, max:100}}}
+    });
+
+    // Log
+    const logBody = document.getElementById('logBody');
+    logBody.innerHTML = rows.slice().reverse().slice(0,80).map(r=>{
+      const kind = decisionKind(r.decision);
+      const badgeClass = kind==='achat'?'b-achat':kind==='vente'?'b-vente':kind==='attente'?'b-attente':'b-hold';
+      return `<tr>
+        <td>${fmtTime(r.date)}</td>
+        <td>$${parseFloat(r.prix_btc).toLocaleString()}</td>
+        <td>${r.rsi||'—'}</td>
+        <td>${r.motif_chandelier||'—'}</td>
+        <td><span class="badge ${badgeClass}">${(r.decision||'').split(' (')[0]}</span></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function baseOpts(unit){
+    return {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false}, tooltip:{backgroundColor:'#0d0b12', borderColor:'rgba(255,45,180,.3)', borderWidth:1,
+        titleColor:'#eae6f0', bodyColor:'#eae6f0'}},
+      scales:{
+        x:{ticks:{color:'#7a7285', maxTicksLimit:6, font:{size:9}}, grid:{color:'rgba(255,45,180,.08)'}},
+        y:{ticks:{color:'#7a7285', font:{size:9}}, grid:{color:'rgba(255,45,180,.08)'}}
+      }
+    };
+  }
+
+  function updateClock(){
+    document.getElementById('clock').textContent = new Date().toISOString().slice(0,19).replace('T',' ')+' UTC';
+  }
+
+  // ---------------- Chat / voix ----------------
+
+  function chatLog(role, text){
+    const el = document.getElementById('chatLog');
+    if(el.children.length===1 && el.children[0].tagName==='SPAN' && el.children[0].style.fontStyle==='italic'){
+      el.innerHTML='';
+    }
+    const line = document.createElement('div');
+    line.style.marginBottom='8px';
+    if(role==='u'){
+      line.innerHTML = `<span style="color:var(--amber); font-size:9px;">VOUS&nbsp;</span> ${text}`;
+    } else {
+      line.innerHTML = `<span style="color:var(--magenta); font-size:9px;">BOT&nbsp;</span> ${text}`;
+    }
+    el.appendChild(line);
+    el.scrollTop = el.scrollHeight;
+  }
+
+  function speak(text){
+    if(!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'fr-FR'; u.rate = 1.03;
+    window.speechSynthesis.speak(u);
+  }
+
+  function generateAnswer(question, rows){
+    const q = question.toLowerCase();
+    const last = rows[rows.length-1];
+    const perf = (parseFloat(last.valeur_totale)/1000 - 1) * 100;
+    const trades = rows.filter(r=>r.decision && r.decision.startsWith('VENTE') && r.pnl_pct!=='');
+    const gains = trades.filter(t=>parseFloat(t.pnl_pct)>0);
+
+    if(q.includes('perform') || q.includes('gagn') || q.includes('résultat') || q.includes('resultat')){
+      return `Le portefeuille est à ${parseFloat(last.valeur_totale).toFixed(2)} euros, soit ${perf>=0?'un gain':'une perte'} de ${Math.abs(perf).toFixed(2)} pourcent. ${trades.length} trade${trades.length>1?'s':''} clôturé${trades.length>1?'s':''}, ${gains.length} gagnant${gains.length>1?'s':''}.`;
+    }
+    if(q.includes('position') || q.includes('investi')){
+      return last.position==='1'
+        ? `Le bot est actuellement investi en BTC, entré à ${last.prix_entree || 'un prix non précisé'} dollars.`
+        : `Le bot est actuellement en cash, il attend un signal RSI.`;
+    }
+    if(q.includes('rsi')){
+      return `Le RSI actuel est à ${last.rsi || 'non calculable pour le moment'}, contre ${last.rsi_precedent || '—'} à l'exécution précédente.`;
+    }
+    if(q.includes('bougie') || q.includes('chandelier') || q.includes('motif')){
+      return last.motif_chandelier ? `La dernière figure détectée est : ${last.motif_chandelier}.` : `Aucune figure de bougie particulière détectée sur la dernière exécution.`;
+    }
+    if(q.includes('sentiment') || q.includes('marché') || q.includes('marche')){
+      return `Le sentiment de marché actuel est "${last.sentiment_marche}". ${last.mode_prudent==='True' ? "Mode prudent activé, exposition réduite." : "Fonctionnement normal."}`;
+    }
+    if(q.includes('décision') || q.includes('decision') || q.includes('dernier') || q.includes('derniere') || q.includes('dernière')){
+      return `Dernière décision : ${last.decision}, à ${parseFloat(last.prix_btc).toLocaleString()} dollars, le ${last.date}.`;
+    }
+    if(q.includes('perte') || q.includes('erreur')){
+      return `${last.pertes_consecutives || 0} perte(s) consécutive(s) enregistrée(s) actuellement.`;
+    }
+    if(q.includes('prix')){
+      return `Prix BTC actuel : ${parseFloat(last.prix_btc).toLocaleString()} dollars, relevé le ${last.date}.`;
+    }
+    return `État actuel : ${parseFloat(last.valeur_totale).toFixed(2)}€, position ${last.position==='1'?'BTC':'cash'}, RSI ${last.rsi||'—'}, sentiment "${last.sentiment_marche}".`;
+  }
+
+  function askBot(question){
+    chatLog('u', question);
+    if(!rows || rows.length===0){
+      chatLog('bot', "Aucune donnée chargée pour l'instant.");
+      return;
+    }
+    const answer = generateAnswer(question, rows);
+    chatLog('bot', answer);
+    speak(answer);
+  }
+
+  document.getElementById('sendBtn').onclick = ()=>{
+    const input = document.getElementById('chatInput');
+    const q = input.value.trim();
+    if(q){ askBot(q); input.value=''; }
+  };
+  document.getElementById('chatInput').addEventListener('keydown', e=>{
+    if(e.key==='Enter') document.getElementById('sendBtn').click();
+  });
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const micBtn = document.getElementById('micBtn');
+  if(SR){
+    const recognition = new SR();
+    recognition.lang='fr-FR';
+    recognition.interimResults=false;
+    let listening=false;
+    micBtn.onclick = ()=>{
+      if(listening) return;
+      listening=true;
+      micBtn.style.background='var(--loss)';
+      recognition.start();
+    };
+    recognition.onresult = (e)=> askBot(e.results[0][0].transcript);
+    recognition.onend = ()=>{ listening=false; micBtn.style.background='rgba(255,45,180,.1)'; };
+    recognition.onerror = ()=>{ listening=false; micBtn.style.background='rgba(255,45,180,.1)'; chatLog('bot','Micro indisponible sur ce navigateur — utilise le champ texte.'); };
+  } else {
+    micBtn.onclick = ()=> chatLog('bot','Reconnaissance vocale non supportée ici — utilise le champ texte.');
+  }
+
+  function init(){
+    updateClock();
+    setInterval(updateClock, 1000);
+    load();
+    setInterval(load, 60000);
+    document.getElementById('repoInput').addEventListener('change', load);
+  }
+  init();
+</script>
+</body>
+</html>
