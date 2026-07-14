@@ -5,3 +5,4 @@ date,actif,prix_btc,rsi,rsi_precedent,sma_longue,tendance_haussiere,atr,volume_c
 2026-07-14 14:55 UTC,ETH/USD,1876.21,81.4,85.6,1784.1,True,14.015,True,Extreme Fear,,1773.32,,HOLD,0.5,False,0,0,0.0,1000.0,0.0,,,,1000.0
 2026-07-14 15:01 UTC,ETH/USD,1875.7,86.3,81.4,1786.29,True,14.9886,True,Extreme Fear,Engulfing haussier,1773.32,,HOLD,0.5,False,0,0,0.0,1000.0,0.0,,,,1000.0
 2026-07-14 15:31 UTC,ETH/USD,1881.58,86.0,86.3,1788.54,True,15.0429,True,Extreme Fear,,1773.32,,HOLD,0.5,False,0,0,0.0,1000.0,0.0,,,,1000.0
+2026-07-14 16:01 UTC,ETH/USD,1871.55,80.9,86.0,1790.4,True,15.7886,True,Extreme Fear,,1773.3,,HOLD,0.5,False,0,0,0.0,1000.0,0.0,,,,1000.0
