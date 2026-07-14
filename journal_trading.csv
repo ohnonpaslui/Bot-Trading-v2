@@ -1,3 +1,4 @@
 date,prix_btc,rsi,rsi_precedent,sentiment_marche,motif_chandelier,support_proche,resistance_proche,decision,taille_position_appliquee,mode_prudent,pertes_consecutives,position,capital,btc_detenu,prix_entree,pnl_pct,valeur_totale
 2026-07-14 12:46 UTC,63740.3,83.2,68.0,Extreme Fear,,62993.33,64212.94,HOLD,0.5,False,0,0.0,1000.0,0.0,,,1000.0
 2026-07-14 13:01 UTC,63786.3,88.1,83.2,Extreme Fear,,62993.33,64212.94,HOLD,0.5,False,0,0.0,1000.0,0.0,,,1000.0
+2026-07-14 13:15 UTC,63763.5,86.0,88.1,Extreme Fear,,62993.33,64212.94,HOLD,0.5,False,0,0.0,1000.0,0.0,,,1000.0
