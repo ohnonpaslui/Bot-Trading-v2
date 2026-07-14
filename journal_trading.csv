@@ -1,2 +1,3 @@
 date,prix_btc,rsi,rsi_precedent,sentiment_marche,motif_chandelier,decision,taille_position_appliquee,mode_prudent,pertes_consecutives,position,capital,btc_detenu,prix_entree,pnl_pct,valeur_totale
 2026-07-14 09:16 UTC,62633.7,45.8,40.0,Extreme Fear,Doji (indécision),HOLD,0.5,False,0,0.0,1000.0,0.0,,,1000.0
+2026-07-14 10:08 UTC,62630.8,46.5,44.2,Extreme Fear,,HOLD,0.5,False,0,0.0,1000.0,0.0,,,1000.0
