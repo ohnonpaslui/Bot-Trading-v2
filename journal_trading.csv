@@ -4,3 +4,4 @@ date,prix_btc,rsi,rsi_precedent,sentiment_marche,motif_chandelier,support_proche
 2026-07-14 13:15 UTC,63763.5,86.0,88.1,Extreme Fear,,62993.33,64212.94,HOLD,0.5,False,0,0.0,1000.0,0.0,,,1000.0
 2026-07-14 13:31 UTC,63840.8,86.8,86.0,Extreme Fear,Engulfing haussier,63838.82,64212.94,HOLD,0.5,False,0,0.0,1000.0,0.0,,,1000.0
 2026-07-14 13:45 UTC,63740.4,78.9,86.8,Extreme Fear,Engulfing baissier,62993.33,64212.94,HOLD,0.5,False,0,0.0,1000.0,0.0,,,1000.0
+2026-07-14 13:47 UTC,63661.4,78.9,86.8,Extreme Fear,Engulfing baissier,62993.33,64212.94,HOLD,0.5,False,0,0.0,1000.0,0.0,,,1000.0
