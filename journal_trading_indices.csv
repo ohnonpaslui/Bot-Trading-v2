@@ -1,0 +1,2 @@
+date,actif,derniere_bougie,prix,rsi2,sma200,sma5,tendance_haussiere,decision,position,capital,quantite_detenue,prix_entree,pnl_pct,valeur_totale
+2026-07-15 10:07 UTC,S&P 500 (SPY),2026-07-14T17:30:00Z,752.28,94.1,751.81,751.64,True,HOLD,0.0,1000.0,0.0,,,1000.0
