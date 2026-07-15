@@ -58,3 +58,4 @@ date,actif,prix_btc,rsi,rsi_precedent,sma_longue,tendance_haussiere,atr,volume_c
 2026-07-15 15:01 UTC,BTC/USD,65278.4,72.3,71.7,64685.08,True,237.1929,True,Extreme Fear,,63515.22,,HOLD,0.5,False,0,0,1.0,500.0,0.00766939,65129.0,202.6429,,1000.65
 2026-07-15 15:31 UTC,BTC/USD,65317.9,71.1,72.3,64715.29,True,246.0643,False,Extreme Fear,Doji (indécision),63515.22,,HOLD,0.5,False,0,0,1.0,500.0,0.00766939,65129.0,202.6429,,1000.95
 2026-07-15 16:01 UTC,BTC/USD,65295.3,69.3,71.1,64737.8,True,251.95,True,Extreme Fear,Doji (indécision),63515.22,,HOLD,0.5,False,0,0,1.0,500.0,0.00766939,65129.0,202.6429,,1000.78
+2026-07-15 16:31 UTC,BTC/USD,65081.3,58.3,69.3,64750.7,True,271.15,True,Extreme Fear,Engulfing baissier,63517.48,,VENTE (retournement RSI),0.5,False,0,0,0,998.63,0.0,,,-0.07,998.63
