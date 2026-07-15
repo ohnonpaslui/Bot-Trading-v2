@@ -26,3 +26,4 @@ date,actif,prix_btc,rsi,rsi_precedent,sma_longue,tendance_haussiere,atr,volume_c
 2026-07-14 23:31 UTC,BTC/EUR,56799.7,55.6,57.3,55559.72,True,195.4571,False,Extreme Fear,,56022.16,,HOLD,0.5,False,0,0,0.0,1000.0,0.0,,,,1000.0
 2026-07-15 00:01 UTC,BTC/EUR,56871.0,63.8,55.6,55610.07,True,192.1071,False,Extreme Fear,,56022.16,,HOLD,0.5,False,0,0,0.0,1000.0,0.0,,,,1000.0
 2026-07-15 00:31 UTC,BTC/EUR,56712.0,61.6,63.8,55652.96,True,182.5786,False,Extreme Fear,Engulfing baissier,56022.16,,HOLD,0.5,False,0,0,0.0,1000.0,0.0,,,,1000.0
+2026-07-15 01:01 UTC,BTC/EUR,56627.9,56.1,61.6,55692.27,True,173.5643,False,Extreme Fear,,56022.16,,HOLD,0.5,False,0,0,0.0,1000.0,0.0,,,,1000.0
