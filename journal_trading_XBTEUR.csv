@@ -8,3 +8,4 @@ date,actif,prix_btc,rsi,rsi_precedent,sma_longue,tendance_haussiere,atr,volume_c
 2026-07-16 10:01 UTC,BTC/EUR,55870.9,29.6,27.6,56546.5,False,180.7357,True,Extreme Fear,Tweezer Bottom (retournement haussier),baissier,54809.5,56557.78,HOLD,0.5,False,0,0,0.0,1000.0,0.0,,,,,1000.0
 2026-07-16 10:31 UTC,BTC/EUR,55985.0,34.9,29.6,56531.51,False,182.1643,True,Extreme Fear,,neutre,54809.5,56557.78,HOLD,0.5,False,0,0,0.0,1000.0,0.0,,,,,1000.0
 2026-07-16 11:01 UTC,BTC/EUR,55971.7,37.4,34.9,56519.48,False,177.3071,False,Extreme Fear,Trois soldats blancs (continuation haussière),neutre,54809.5,56557.78,HOLD (achat retardé : tendance de fond baissière (prix sous la SMA50)),0.5,False,0,0,0.0,1000.0,0.0,,,,,1000.0
+2026-07-16 11:31 UTC,BTC/EUR,55973.9,34.7,37.4,56507.24,False,178.9929,False,Extreme Fear,Dark Cloud Cover (retournement baissier),neutre,54809.5,56557.78,HOLD,0.5,False,0,0,0.0,1000.0,0.0,,,,,1000.0

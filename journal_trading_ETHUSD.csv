@@ -8,3 +8,4 @@ date,actif,prix_btc,rsi,rsi_precedent,sma_longue,tendance_haussiere,atr,volume_c
 2026-07-16 10:01 UTC,ETH/USD,1883.44,17.4,19.3,1912.96,False,9.1879,False,Extreme Fear,Bullish Harami (retournement haussier),baissier,1873.36,1887.42,HOLD,0.5,False,0,0,0.0,1000.0,0.0,,,,,1000.0
 2026-07-16 10:31 UTC,ETH/USD,1887.27,21.5,17.4,1913.07,False,9.19,False,Extreme Fear,Three Inside Up (retournement haussier confirmé),neutre,1873.36,1887.42,HOLD,0.5,False,0,0,0.0,1000.0,0.0,,,,,1000.0
 2026-07-16 11:01 UTC,ETH/USD,1885.58,24.4,21.5,1913.25,False,8.8829,False,Extreme Fear,Tweezer Top (retournement baissier),neutre,1873.36,1887.42,HOLD,0.5,False,0,0,0.0,1000.0,0.0,,,,,1000.0
+2026-07-16 11:31 UTC,ETH/USD,1882.06,21.9,24.4,1913.39,False,8.8043,False,Extreme Fear,"Étoile du soir (Evening Star, retournement baissier)",neutre,1873.36,1887.42,HOLD,0.5,False,0,0,0.0,1000.0,0.0,,,,,1000.0
