@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUANT LAB · Multi-Bot Terminal</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600&display=swap');
+
+  :root{
+    --void:#050608;
+    --panel:#0a0d10;
+    --line:rgba(109,255,196,.16);
+    --line-strong:rgba(109,255,196,.4);
+    --mint:#6dffc4;
+    --red:#ff5468;
+    --amber:#ffb454;
+    --text:#d9e2dd;
+    --dim:#5b6864;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;background:var(--void);color:var(--text);font-family:'Inter',sans-serif;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+
+  body{
+    background:
+      radial-gradient(ellipse 800px 400px at 50% 0%, rgba(109,255,196,.06), transparent 60%),
+      var(--void);
+  }
+
+  header{position:sticky; top:0; z-index:20; background:rgba(5,6,8,.92); backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line); padding:12px 16px;}
+  .header-row{display:flex; justify-content:space-between; align-items:center;}
+  .brand{display:flex; align-items:center; gap:8px;}
+  .dot{width:7px; height:7px; border-radius:50%; background:var(--mint); box-shadow:0 0 8px var(--mint); animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .brand b{font-family:'JetBrains Mono',monospace; font-size:13px; letter-spacing:.15em; font-weight:800;}
+  #clock{font-family:'JetBrains Mono',monospace; font-size:9.5px; color:var(--dim);}
+  .repo-input{background:transparent; border:none; border-bottom:1px dotted var(--line-strong); color:var(--dim);
+    font-family:'JetBrains Mono',monospace; font-size:9px; width:190px; text-align:right;}
+
+  .tabs{display:flex; gap:6px; margin-top:12px; overflow-x:auto; padding-bottom:2px;}
+  .tab-btn{
+    flex-shrink:0; background:var(--panel); border:1px solid var(--line); color:var(--dim);
+    font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.06em; text-transform:uppercase;
+    padding:8px 12px; border-radius:3px; white-space:nowrap;
+  }
+  .tab-btn.active{border-color:var(--mint); color:var(--mint); background:rgba(109,255,196,.06);}
+
+  main{max-width:920px; margin:0 auto; padding:14px;}
+
+  .stat-row{display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-bottom:10px;}
+  @media(min-width:640px){.stat-row{grid-template-columns:repeat(4,1fr);}}
+  .stat{background:var(--panel); border:1px solid var(--line); padding:12px; border-radius:3px;}
+  .stat .l{font-size:8.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); margin-bottom:6px;}
+  .stat .v{font-family:'JetBrains Mono',monospace; font-size:19px; font-weight:700;}
+  .up{color:var(--mint);} .down{color:var(--red);} .neutral{color:var(--amber);}
+
+  .panel{background:var(--panel); border:1px solid var(--line); border-radius:3px; padding:16px; margin-bottom:10px;}
+  .panel h3{font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--mint); margin:0 0 12px; font-weight:700;}
+  .panel .note{font-size:10px; color:var(--dim); margin-top:8px; line-height:1.5;}
+  .chart-box{height:170px;}
+
+  .hist-wrap{display:flex; align-items:flex-end; gap:3px; height:120px; border-bottom:1px dashed var(--line-strong); position:relative;}
+  .hist-bar{flex:1; border-radius:2px 2px 0 0; min-height:2px; position:relative;}
+  .hist-bar.gain{background:linear-gradient(180deg, var(--mint), rgba(109,255,196,.25));}
+  .hist-bar.loss{background:linear-gradient(180deg, var(--red), rgba(255,84,104,.25));}
+  .hist-labels{display:flex; gap:3px; margin-top:6px;}
+  .hist-labels span{flex:1; text-align:center; font-size:7px; color:var(--dim); font-family:'JetBrains Mono',monospace;}
+
+  table{width:100%; border-collapse:collapse; font-size:11px;}
+  thead th{text-align:left; font-family:'JetBrains Mono',monospace; font-size:8.5px; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--mint); padding:7px 5px; border-bottom:1px solid var(--line); position:sticky; top:0; background:var(--panel);}
+  tbody td{padding:7px 5px; border-bottom:1px solid var(--line); font-family:'JetBrains Mono',monospace; white-space:nowrap;}
+  .log-scroll{max-height:280px; overflow-y:auto;}
+  .badge{padding:2px 7px; border-radius:2px; font-size:9px; letter-spacing:.03em; border:1px solid;}
+  .badge.achat{border-color:var(--mint); color:var(--mint);}
+  .badge.vente{border-color:var(--red); color:var(--red);}
+  .badge.hold{border-color:var(--dim); color:var(--dim);}
+
+  .kv-row{display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px dashed var(--line); font-size:12px;}
+  .kv-row:last-child{border-bottom:none;}
+  .kv-row .k{color:var(--dim);}
+  .kv-row .v{font-weight:500;}
+
+  .detail-grid{display:grid; grid-template-columns:1fr 1fr; gap:0 16px;}
+  .detail-grid .kv-row{grid-column:span 1;}
+
+  #status{text-align:center; padding:50px 20px; font-size:11px; color:var(--dim); font-family:'JetBrains Mono',monospace;}
+  #status.error{color:var(--red);}
+  footer{text-align:center; padding:18px; font-size:8.5px; letter-spacing:.12em; color:var(--dim); text-transform:uppercase; font-family:'JetBrains Mono',monospace;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-row">
+    <div class="brand"><span class="dot"></span><b>QUANT LAB</b></div>
+    <div style="text-align:right;">
+      <div id="clock">--</div>
+      <input id="repoInput" class="repo-input" value="ohnonpaslui/Bot-Trading-v2" spellcheck="false">
+    </div>
+  </div>
+  <div class="tabs" id="tabs">
+    <button class="tab-btn" data-journal="journal_trading.csv">CRYPTO RSI</button>
+    <button class="tab-btn" data-journal="journal_trading_indices.csv">INDICES</button>
+    <button class="tab-btn" data-journal="journal_scalping_bollinger_BTCUSD.csv">BOLLINGER</button>
+  </div>
+</header>
+
+<main>
+  <div id="status">Chargement du registre en cours…</div>
+  <div id="content" style="display:none;">
+
+    <div class="stat-row">
+      <div class="stat"><div class="l">Valeur</div><div class="v mono" id="sVal">—</div></div>
+      <div class="stat"><div class="l">Performance</div><div class="v mono" id="sPerf">—</div></div>
+      <div class="stat"><div class="l">Trades / Réussite</div><div class="v mono" id="sTrades">—</div></div>
+      <div class="stat"><div class="l">Sharpe (simplifié)</div><div class="v mono" id="sSharpe">—</div></div>
+    </div>
+
+    <div class="panel">
+      <h3>Signal actuel</h3>
+      <div id="detailFields"></div>
+    </div>
+
+    <div class="panel">
+      <h3>Position</h3>
+      <div class="kv-row"><span class="k">Statut</span><span class="v mono" id="posStatut">—</span></div>
+      <div class="kv-row"><span class="k">Prix d'entrée</span><span class="v mono" id="posEntree">—</span></div>
+      <div class="kv-row"><span class="k">Quantité détenue</span><span class="v mono" id="posQuantite">—</span></div>
+      <div class="kv-row"><span class="k">Dernière décision</span><span class="v mono" id="posDecision">—</span></div>
+    </div>
+
+    <div class="panel">
+      <h3>Prix &amp; décisions</h3>
+      <div class="chart-box"><canvas id="priceChart"></canvas></div>
+    </div>
+
+    <div class="panel">
+      <h3>Distribution des trades clôturés (% de gain/perte)</h3>
+      <div class="hist-wrap" id="histWrap"></div>
+      <div class="hist-labels" id="histLabels"></div>
+      <div class="note" id="histNote">—</div>
+    </div>
+
+    <div class="panel">
+      <h3>Courbe du portefeuille</h3>
+      <div class="chart-box"><canvas id="equityChart"></canvas></div>
+    </div>
+
+    <div class="panel">
+      <h3>Journal d'exécution</h3>
+      <div class="log-scroll">
+        <table>
+          <thead><tr><th>Date</th><th>Prix</th><th>Décision</th><th>PnL%</th></tr></thead>
+          <tbody id="logBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer>Données réelles lues depuis GitHub · Paper trading · Aucun ordre réel · Pas de chiffres inventés</footer>
+
+<script>
+  let rows = [];
+  let equityChart, priceChart;
+  let journalActuel = 'journal_trading.csv';
+
+  function parseCSV(text){
+    const lines = text.trim().split('\n');
+    function parseLine(line){
+      const result=[]; let cur=''; let inQ=false;
+      for(let i=0;i<line.length;i++){
+        const c=line[i];
+        if(inQ){ if(c==='"'){ if(line[i+1]==='"'){cur+='"';i++;} else inQ=false; } else cur+=c; }
+        else { if(c==='"') inQ=true; else if(c===','){ result.push(cur); cur=''; } else cur+=c; }
+      }
+      result.push(cur);
+      return result;
+    }
+    const headers = parseLine(lines[0]);
+    return lines.slice(1).filter(l=>l.trim().length>0).map(line=>{
+      const vals = parseLine(line);
+      const row = {};
+      headers.forEach((h,i)=> row[h.trim()] = (vals[i]||'').trim());
+      return row;
+    });
+  }
+
+  function fmtDate(d){ return (d||'').replace(' UTC','').slice(5,16); }
+  function decisionKind(dec){
+    if(!dec) return 'hold';
+    if(dec.startsWith('ACHAT')) return 'achat';
+    if(dec.startsWith('VENTE')) return 'vente';
+    return 'hold';
+  }
+  function champPrix(r){ return r.prix_btc || r.prix || 0; }
+
+  // Champs techniques a afficher s'ils existent dans le journal du bot selectionne
+  // (chaque bot a des colonnes differentes ; on n'affiche que ce qui est reellement present)
+  const CHAMPS_DETAIL = [
+    {cle:'rsi', label:'RSI'},
+    {cle:'rsi_precedent', label:'RSI précédent'},
+    {cle:'rsi2', label:'RSI(2)'},
+    {cle:'sma_longue', label:'SMA longue (tendance)', fmt:v=>'$'+parseFloat(v).toLocaleString()},
+    {cle:'sma200', label:'SMA tendance', fmt:v=>'$'+parseFloat(v).toLocaleString()},
+    {cle:'sma5', label:'SMA5 (sortie)', fmt:v=>'$'+parseFloat(v).toLocaleString()},
+    {cle:'bande_basse', label:'Bande basse', fmt:v=>'$'+parseFloat(v).toLocaleString()},
+    {cle:'moyenne', label:'Moyenne (bande centrale)', fmt:v=>'$'+parseFloat(v).toLocaleString()},
+    {cle:'bande_haute', label:'Bande haute', fmt:v=>'$'+parseFloat(v).toLocaleString()},
+    {cle:'tendance_haussiere', label:'Tendance', fmt:v=> v==='True' ? '▲ Haussière' : '▼ Baissière'},
+    {cle:'atr', label:'ATR (volatilité)'},
+    {cle:'volume_confirme', label:'Volume confirmé', fmt:v=> v==='True' ? 'Oui' : 'Non'},
+    {cle:'sentiment_marche', label:'Sentiment marché'},
+    {cle:'motif_chandelier', label:'Bougie détectée'},
+    {cle:'biais_directionnel', label:'Biais directionnel'},
+    {cle:'support_proche', label:'Support proche', fmt:v=>'$'+parseFloat(v).toLocaleString()},
+    {cle:'resistance_proche', label:'Résistance proche', fmt:v=>'$'+parseFloat(v).toLocaleString()},
+    {cle:'mode_prudent', label:'Mode prudent', fmt:v=> v==='True' ? 'Activé' : 'Non'},
+    {cle:'pertes_consecutives', label:'Pertes consécutives'},
+    {cle:'cooldown_restant', label:'Cooldown restant'},
+    {cle:'or_haut', label:'Fourchette (haut)', fmt:v=>'$'+parseFloat(v).toLocaleString()},
+    {cle:'or_bas', label:'Fourchette (bas)', fmt:v=>'$'+parseFloat(v).toLocaleString()},
+  ];
+
+  async function load(){
+    const repo = document.getElementById('repoInput').value.trim();
+    const status = document.getElementById('status');
+    const content = document.getElementById('content');
+    status.style.display='block'; status.className=''; content.style.display='none';
+    status.textContent = `Chargement de ${journalActuel}…`;
+    const url = `https://raw.githubusercontent.com/${repo}/main/${journalActuel}?t=${Date.now()}`;
+    try{
+      const res = await fetch(url);
+      if(!res.ok) throw new Error("Registre introuvable (ce bot a-t-il déjà tourné ?)");
+      const text = await res.text();
+      rows = parseCSV(text);
+      if(rows.length===0) throw new Error("Registre vide.");
+      render(rows);
+      status.style.display='none';
+      content.style.display='block';
+    }catch(e){
+      status.className='error';
+      status.textContent = '⚠ ' + e.message;
+    }
+  }
+
+  function render(rows){
+    const last = rows[rows.length-1];
+    const perf = (parseFloat(last.valeur_totale)/1000 - 1) * 100;
+    const clotures = rows.filter(r=>r.decision && r.decision.startsWith('VENTE') && r.pnl_pct && r.pnl_pct !== '');
+    const gains = clotures.filter(t=>parseFloat(t.pnl_pct)>0);
+
+    document.getElementById('sVal').textContent = parseFloat(last.valeur_totale).toFixed(2)+'€';
+    const perfEl = document.getElementById('sPerf');
+    perfEl.textContent = (perf>=0?'+':'')+perf.toFixed(2)+'%';
+    perfEl.className = 'v mono ' + (perf>=0?'up':'down');
+    document.getElementById('sTrades').textContent = `${clotures.length} / ${clotures.length? (gains.length/clotures.length*100).toFixed(0)+'%':'—'}`;
+
+    // Panneau "Signal actuel" : n'affiche que les champs reellement presents dans ce journal
+    const detailWrap = document.getElementById('detailFields');
+    const champsPresents = CHAMPS_DETAIL.filter(c => last[c.cle] !== undefined && last[c.cle] !== '');
+    if(champsPresents.length === 0){
+      detailWrap.innerHTML = '<div style="color:var(--dim); font-size:11px;">Aucun champ technique disponible pour ce bot.</div>';
+    } else {
+      detailWrap.innerHTML = '<div class="detail-grid">' + champsPresents.map(c=>{
+        const valeur = c.fmt ? c.fmt(last[c.cle]) : last[c.cle];
+        return `<div class="kv-row"><span class="k">${c.label}</span><span class="v mono">${valeur}</span></div>`;
+      }).join('') + '</div>';
+    }
+
+    // Panneau "Position"
+    document.getElementById('posStatut').textContent = last.position === '1' ? 'INVESTI' : 'CASH';
+    document.getElementById('posEntree').textContent = last.prix_entree ? '$'+parseFloat(last.prix_entree).toLocaleString() : '—';
+    document.getElementById('posQuantite').textContent = last.quantite_detenue && parseFloat(last.quantite_detenue) > 0 ? parseFloat(last.quantite_detenue).toFixed(6) : '—';
+    document.getElementById('posDecision').textContent = (last.decision || '—').split(' (')[0];
+
+    // Sharpe simplifie : moyenne des pnl% / ecart-type des pnl%, PAR TRADE (pas annualise -
+    // une vraie annualisation demanderait une frequence de temps homogene, qu'on n'a pas
+    // entre ces 4 bots tres differents en cadence). Indicateur de regularite, pas un vrai
+    // Sharpe institutionnel.
+    const sharpeEl = document.getElementById('sSharpe');
+    if(clotures.length >= 2){
+      const valeurs = clotures.map(t=>parseFloat(t.pnl_pct));
+      const moyenne = valeurs.reduce((a,b)=>a+b,0)/valeurs.length;
+      const variance = valeurs.reduce((a,b)=>a+(b-moyenne)**2,0)/valeurs.length;
+      const ecartType = Math.sqrt(variance);
+      const sharpe = ecartType>0 ? moyenne/ecartType : 0;
+      sharpeEl.textContent = sharpe.toFixed(2);
+      sharpeEl.className = 'v mono ' + (sharpe>=0?'up':'down');
+    } else {
+      sharpeEl.textContent = '—';
+    }
+
+    // Histogramme reel de la distribution des pnl%
+    const histWrap = document.getElementById('histWrap');
+    const histLabels = document.getElementById('histLabels');
+    const histNote = document.getElementById('histNote');
+    if(clotures.length === 0){
+      histWrap.innerHTML = '<div style="color:var(--dim); font-size:11px; margin:auto;">Aucun trade clôturé pour l\'instant.</div>';
+      histLabels.innerHTML = '';
+      histNote.textContent = "L'histogramme s'affichera dès que ce bot aura clôturé au moins un trade.";
+    } else {
+      const valeurs = clotures.map(t=>parseFloat(t.pnl_pct));
+      const bornes = [-Infinity,-2,-1,-0.5,0,0.5,1,2,Infinity];
+      const libelles = ['<-2%','-2/-1','-1/-.5','-.5/0','0/.5','.5/1','1/2','>2%'];
+      const compteurs = new Array(libelles.length).fill(0);
+      valeurs.forEach(v=>{
+        for(let i=0;i<bornes.length-1;i++){
+          if(v > bornes[i] && v <= bornes[i+1]){ compteurs[i]++; break; }
+        }
+      });
+      const maxCompte = Math.max(...compteurs, 1);
+      histWrap.innerHTML = compteurs.map((c,i)=>{
+        const hauteur = Math.max((c/maxCompte)*100, c>0?4:0);
+        const cls = i < 4 ? 'loss' : 'gain';
+        return `<div class="hist-bar ${cls}" style="height:${hauteur}%" title="${libelles[i]} : ${c} trade(s)"></div>`;
+      }).join('');
+      histLabels.innerHTML = libelles.map(l=>`<span>${l}</span>`).join('');
+      histNote.textContent = `${clotures.length} trade(s) clôturé(s) au total, répartis ci-dessus par tranche de gain/perte en %.`;
+    }
+
+    // Equity chart
+    const labels = rows.map(r=>fmtDate(r.date));
+    const equity = rows.map(r=>parseFloat(r.valeur_totale));
+    if(equityChart) equityChart.destroy();
+    equityChart = new Chart(document.getElementById('equityChart'), {
+      type:'line',
+      data:{labels, datasets:[{data:equity, borderColor:'#6dffc4', backgroundColor:'rgba(109,255,196,.08)',
+        fill:true, borderWidth:1.5, pointRadius:0, tension:.2}]},
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        plugins:{legend:{display:false}, tooltip:{backgroundColor:'#0a0d10', borderColor:'rgba(109,255,196,.3)', borderWidth:1,
+          titleColor:'#d9e2dd', bodyColor:'#d9e2dd'}},
+        scales:{
+          x:{ticks:{color:'#5b6864', maxTicksLimit:6, font:{size:9}}, grid:{color:'rgba(109,255,196,.06)'}},
+          y:{ticks:{color:'#5b6864', font:{size:9}}, grid:{color:'rgba(109,255,196,.06)'}}
+        }
+      }
+    });
+
+    // Price chart avec marqueurs achat/vente
+    const prices = rows.map(r=>parseFloat(champPrix(r)));
+    const buys = rows.map(r=> decisionKind(r.decision)==='achat' ? parseFloat(champPrix(r)) : null);
+    const sells = rows.map(r=> decisionKind(r.decision)==='vente' ? parseFloat(champPrix(r)) : null);
+    if(priceChart) priceChart.destroy();
+    priceChart = new Chart(document.getElementById('priceChart'), {
+      type:'line',
+      data:{labels, datasets:[
+        {data:prices, borderColor:'#5b6864', borderWidth:1.3, pointRadius:0, tension:.15},
+        {data:buys, borderColor:'transparent', backgroundColor:'#6dffc4', pointRadius:5, pointStyle:'triangle', showLine:false},
+        {data:sells, borderColor:'transparent', backgroundColor:'#ff5468', pointRadius:5, pointStyle:'rectRot', showLine:false},
+      ]},
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        plugins:{legend:{display:false}, tooltip:{backgroundColor:'#0a0d10', borderColor:'rgba(109,255,196,.3)', borderWidth:1,
+          titleColor:'#d9e2dd', bodyColor:'#d9e2dd'}},
+        scales:{
+          x:{ticks:{color:'#5b6864', maxTicksLimit:6, font:{size:9}}, grid:{color:'rgba(109,255,196,.06)'}},
+          y:{ticks:{color:'#5b6864', font:{size:9}}, grid:{color:'rgba(109,255,196,.06)'}}
+        }
+      }
+    });
+
+    // Log
+    const logBody = document.getElementById('logBody');
+    logBody.innerHTML = rows.slice().reverse().slice(0,100).map(r=>{
+      const kind = decisionKind(r.decision);
+      const prix = champPrix(r);
+      return `<tr>
+        <td>${fmtDate(r.date)}</td>
+        <td>${prix ? '$'+parseFloat(prix).toLocaleString() : '—'}</td>
+        <td><span class="badge ${kind}">${(r.decision||'').split(' (')[0]}</span></td>
+        <td>${r.pnl_pct || '—'}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  function selectionnerOnglet(btn){
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    journalActuel = btn.dataset.journal;
+    load();
+  }
+
+  function updateClock(){
+    document.getElementById('clock').textContent = new Date().toISOString().slice(0,19).replace('T',' ')+' UTC';
+  }
+
+  function init(){
+    updateClock();
+    setInterval(updateClock, 1000);
+    document.querySelectorAll('.tab-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=> selectionnerOnglet(btn));
+    });
+    document.querySelector('.tab-btn').classList.add('active');
+    load();
+    setInterval(load, 60000);
+    document.getElementById('repoInput').addEventListener('change', load);
+  }
+  init();
+</script>
+</body>
+</html>
