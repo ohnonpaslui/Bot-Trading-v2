@@ -5,3 +5,4 @@ date,actif,prix_btc,rsi,rsi_precedent,sma_longue,tendance_haussiere,atr,volume_c
 2026-07-16 08:31 UTC,ETH/USD,1890.56,31.5,44.6,1912.4,False,8.8564,True,Extreme Fear,Trois corbeaux noirs (continuation baissière),baissier,1862.63,1928.91,HOLD,0.5,False,0,0,0.0,1000.0,0.0,,,,,1000.0
 2026-07-16 09:01 UTC,ETH/USD,1887.39,20.1,31.5,1912.71,False,9.0957,False,Extreme Fear,Trois corbeaux noirs (continuation baissière),baissier,1862.63,1887.42,HOLD,0.5,False,0,0,0.0,1000.0,0.0,,,,,1000.0
 2026-07-16 09:31 UTC,ETH/USD,1883.39,19.3,20.1,1912.87,False,9.2493,False,Extreme Fear,Trois corbeaux noirs (continuation baissière),baissier,1862.63,1887.42,HOLD,0.5,False,0,0,0.0,1000.0,0.0,,,,,1000.0
+2026-07-16 10:01 UTC,ETH/USD,1883.44,17.4,19.3,1912.96,False,9.1879,False,Extreme Fear,Bullish Harami (retournement haussier),baissier,1873.36,1887.42,HOLD,0.5,False,0,0,0.0,1000.0,0.0,,,,,1000.0
