@@ -4,3 +4,4 @@ date,actif,prix_btc,rsi,rsi_precedent,sma_longue,tendance_haussiere,atr,volume_c
 2026-07-16 08:01 UTC,BTC/USD,64200.1,37.5,45.9,64793.35,False,194.5357,True,Extreme Fear,Trois corbeaux noirs (continuation baissière),baissier,63772.49,,HOLD,0.5,False,0,0,0.0,1000.0,0.0,,,,,1000.0
 2026-07-16 08:31 UTC,BTC/USD,64126.0,36.0,37.5,64785.71,False,201.6286,True,Extreme Fear,Trois corbeaux noirs (continuation baissière),baissier,63775.15,,HOLD,0.5,False,0,0,0.0,1000.0,0.0,,,,,1000.0
 2026-07-16 09:01 UTC,BTC/USD,64085.9,26.9,36.0,64777.08,False,203.4143,False,Extreme Fear,Trois corbeaux noirs (continuation baissière),baissier,63775.15,,HOLD,0.5,False,0,0,0.0,1000.0,0.0,,,,,1000.0
+2026-07-16 09:31 UTC,BTC/USD,64009.9,26.5,26.9,64764.86,False,204.7714,False,Extreme Fear,Trois corbeaux noirs (continuation baissière),baissier,63775.15,64536.08,HOLD,0.5,False,0,0,0.0,1000.0,0.0,,,,,1000.0
