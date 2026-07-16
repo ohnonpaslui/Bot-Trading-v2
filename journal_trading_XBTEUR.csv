@@ -83,3 +83,4 @@ date,actif,prix_btc,rsi,rsi_precedent,sma_longue,tendance_haussiere,atr,volume_c
 2026-07-16 01:31 UTC,BTC/EUR,56283.3,25.2,25.3,56652.03,False,143.3071,True,Extreme Fear,Doji (indécision),56211.47,56555.95,HOLD,0.5,False,0,0,0.0,1000.0,0.0,,,,1000.0
 2026-07-16 02:01 UTC,BTC/EUR,56428.8,43.8,25.2,56647.18,False,148.5714,False,Extreme Fear,Engulfing haussier,56211.47,56555.95,HOLD (achat retardé : tendance de fond baissière (prix sous la SMA50)),0.5,False,0,0,0.0,1000.0,0.0,,,,1000.0
 2026-07-16 02:31 UTC,BTC/EUR,56369.8,42.9,43.8,56641.77,False,143.1571,False,Extreme Fear,,56211.47,56555.95,HOLD,0.5,False,0,0,0.0,1000.0,0.0,,,,1000.0
+2026-07-16 03:01 UTC,BTC/EUR,56353.2,30.8,42.9,56638.41,False,135.75,False,Extreme Fear,,56189.76,56555.95,HOLD,0.5,False,0,0,0.0,1000.0,0.0,,,,1000.0
